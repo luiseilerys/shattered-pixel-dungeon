@@ -10,1115 +10,1271 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            background-color: #1a1a2e;
-            color: #eee;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             font-family: 'Courier New', monospace;
+            color: #fff;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
             padding: 20px;
         }
-        
+
         .game-container {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 300px;
             gap: 20px;
             max-width: 1200px;
+            width: 100%;
         }
-        
+
         .main-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #4a4a6a;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
         }
-        
+
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #4a4a6a;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
+        }
+
         .status-bar {
-            background: linear-gradient(180deg, #4a4a6a 0%, #2a2a4a 100%);
-            border: 3px solid #6a6a8a;
-            border-radius: 5px;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            min-width: 600px;
-        }
-        
-        .status-item {
-            display: flex;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
+            margin-bottom: 15px;
         }
-        
-        .hp-bar {
-            width: 150px;
-            height: 20px;
-            background: #333;
-            border: 2px solid #555;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        
-        .hp-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff4444 0%, #cc0000 100%);
-            transition: width 0.3s;
-        }
-        
-        .xp-bar {
-            width: 100px;
-            height: 15px;
-            background: #333;
-            border: 2px solid #555;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        
-        .xp-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #44ff44 0%, #00cc00 100%);
-            transition: width 0.3s;
-        }
-        
-        .canvas-container {
-            border: 4px solid #6a6a8a;
+
+        .status-item {
+            background: linear-gradient(180deg, #2a2a4a 0%, #1a1a3a 100%);
+            padding: 10px;
             border-radius: 5px;
+            border: 2px solid #4a4a6a;
+            text-align: center;
+        }
+
+        .status-label {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .status-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .hp-value { color: #ff4444; }
+        .xp-value { color: #44ff44; }
+        .gold-value { color: #ffd700; }
+        .floor-value { color: #44aaff; }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #1a1a3a;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            margin-top: 5px;
+            border: 2px solid #4a4a6a;
         }
-        
-        #gameCanvas {
-            display: block;
-            background: #000;
+
+        .progress-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 8px;
         }
-        
+
+        .hp-fill { background: linear-gradient(90deg, #ff6666, #ff4444); }
+        .xp-fill { background: linear-gradient(90deg, #66ff66, #44ff44); }
+
+        .game-canvas {
+            display: grid;
+            grid-template-columns: repeat(25, 24px);
+            grid-template-rows: repeat(20, 24px);
+            gap: 1px;
+            background: #0a0a1a;
+            padding: 10px;
+            border-radius: 5px;
+            border: 3px solid #4a4a6a;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .tile {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .tile img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .entity {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .fog {
+            background: #000 !important;
+            opacity: 0.9;
+        }
+
+        .explored {
+            filter: brightness(0.4);
+        }
+
         .side-panel {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            min-width: 250px;
+            gap: 15px;
         }
-        
-        .log-panel {
-            background: linear-gradient(180deg, #2a2a4a 0%, #1a1a2e 100%);
-            border: 3px solid #6a6a8a;
-            border-radius: 5px;
-            padding: 10px;
-            height: 300px;
+
+        .panel-box {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #4a4a6a;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            color: #ffd700;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a4a6a;
+            text-align: center;
+        }
+
+        .combat-log {
+            height: 200px;
             overflow-y: auto;
             font-size: 12px;
             line-height: 1.4;
         }
-        
+
         .log-entry {
             margin-bottom: 5px;
-            padding: 3px 5px;
+            padding: 3px;
             border-radius: 3px;
         }
-        
-        .log-combat { color: #ff6b6b; }
-        .log-item { color: #ffd93d; }
-        .log-info { color: #6bcb77; }
-        .log-danger { color: #ff4757; }
-        .log-level { color: #a55eea; }
-        
-        .inventory-panel {
-            background: linear-gradient(180deg, #2a2a4a 0%, #1a1a2e 100%);
-            border: 3px solid #6a6a8a;
+
+        .log-player { color: #44ff44; }
+        .log-enemy { color: #ff4444; }
+        .log-item { color: #ffd700; }
+        .log-info { color: #44aaff; }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s;
+            border: 2px solid #4a4a6a;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-action {
+            background: linear-gradient(180deg, #4a4a6a 0%, #2a2a4a 100%);
+            color: #fff;
+        }
+
+        .btn-combat {
+            background: linear-gradient(180deg, #6a4a4a 0%, #4a2a2a 100%);
+            color: #fff;
+        }
+
+        .btn-item {
+            background: linear-gradient(180deg, #6a6a4a 0%, #4a4a2a 100%);
+            color: #fff;
+        }
+
+        .inventory-list {
+            list-style: none;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .inventory-item {
+            padding: 5px;
+            margin-bottom: 5px;
+            background: rgba(74, 74, 106, 0.3);
+            border-radius: 3px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .inventory-item img {
+            width: 20px;
+            height: 20px;
+            image-rendering: pixelated;
+        }
+
+        .minimap {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #0a0a1a;
+            border: 2px solid #4a4a6a;
+            border-radius: 5px;
+            display: grid;
+            grid-template-columns: repeat(25, 1fr);
+            grid-template-rows: repeat(20, 1fr);
+        }
+
+        .minimap-cell {
+            width: 100%;
+            height: 100%;
+        }
+
+        .minimap-wall { background: #4a4a6a; }
+        .minimap-floor { background: #2a2a4a; }
+        .minimap-player { background: #44ff44; }
+        .minimap-enemy { background: #ff4444; }
+        .minimap-item { background: #ffd700; }
+
+        .hero-select {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .hero-option {
+            background: rgba(74, 74, 106, 0.5);
+            border: 2px solid #4a4a6a;
             border-radius: 5px;
             padding: 10px;
-        }
-        
-        .inventory-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 5px;
-            margin-top: 10px;
-        }
-        
-        .inventory-slot {
-            width: 40px;
-            height: 40px;
-            background: #333;
-            border: 2px solid #555;
-            border-radius: 3px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
+            text-align: center;
             cursor: pointer;
             transition: all 0.2s;
         }
-        
-        .inventory-slot:hover {
-            border-color: #888;
-            background: #444;
+
+        .hero-option:hover, .hero-option.selected {
+            border-color: #ffd700;
+            background: rgba(74, 74, 106, 0.8);
         }
-        
-        .controls-panel {
-            background: linear-gradient(180deg, #2a2a4a 0%, #1a1a2e 100%);
-            border: 3px solid #6a6a8a;
-            border-radius: 5px;
-            padding: 10px;
+
+        .hero-option img {
+            width: 48px;
+            height: 48px;
+            image-rendering: pixelated;
+            margin-bottom: 5px;
         }
-        
-        .controls-list {
-            list-style: none;
+
+        .hero-option span {
             font-size: 11px;
-            line-height: 1.6;
+            display: block;
         }
-        
-        .controls-list li {
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .key {
-            background: #444;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-weight: bold;
-            min-width: 60px;
-            text-align: center;
-        }
-        
-        .game-over {
+
+        .start-screen, .game-over-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
-        
-        .game-over-content {
-            background: linear-gradient(180deg, #4a1a1a 0%, #2a0a0a 100%);
-            border: 4px solid #ff4444;
-            border-radius: 10px;
-            padding: 40px;
-            text-align: center;
-        }
-        
-        .game-over h2 {
-            color: #ff4444;
+
+        .start-screen h2, .game-over-screen h2 {
             font-size: 36px;
+            color: #ffd700;
             margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
-        
-        .btn {
-            background: linear-gradient(180deg, #4a4a6a 0%, #2a2a4a 100%);
-            border: 2px solid #6a6a8a;
-            color: #fff;
-            padding: 10px 30px;
+
+        .start-screen p, .game-over-screen p {
             font-size: 16px;
-            font-family: inherit;
+            margin-bottom: 10px;
+            color: #aaa;
+        }
+
+        .btn-start {
+            padding: 15px 40px;
+            font-size: 18px;
+            background: linear-gradient(180deg, #6a6a4a 0%, #4a4a2a 100%);
+            color: #fff;
+            border: 3px solid #ffd700;
+            border-radius: 10px;
             cursor: pointer;
-            border-radius: 5px;
             margin-top: 20px;
-            transition: all 0.2s;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
         }
-        
-        .btn:hover {
-            background: linear-gradient(180deg, #5a5a7a 0%, #3a3a5a 100%);
-            border-color: #8a8aaa;
+
+        .btn-start:hover {
+            background: linear-gradient(180deg, #8a8a6a 0%, #6a6a4a 100%);
+            transform: scale(1.05);
         }
-        
-        .minimap {
-            background: #111;
-            border: 2px solid #444;
-            border-radius: 5px;
-            padding: 5px;
+
+        .hidden {
+            display: none !important;
         }
-        
-        #minimapCanvas {
-            display: block;
+
+        .damage-popup {
+            position: absolute;
+            color: #ff4444;
+            font-weight: bold;
+            font-size: 16px;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 100;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-30px); opacity: 0; }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a3a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a4a6a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6a6a8a;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="main-panel">
-            <div class="status-bar">
-                <div class="status-item">
-                    <span>❤️ HP:</span>
-                    <div class="hp-bar">
-                        <div class="hp-fill" id="hpFill" style="width: 100%"></div>
-                    </div>
-                    <span id="hpText">20/20</span>
-                </div>
-                <div class="status-item">
-                    <span>⭐ Nivel:</span>
-                    <span id="levelText">1</span>
-                </div>
-                <div class="status-item">
-                    <span>✨ XP:</span>
-                    <div class="xp-bar">
-                        <div class="xp-fill" id="xpFill" style="width: 0%"></div>
-                    </div>
-                </div>
-                <div class="status-item">
-                    <span>🏛️ Piso:</span>
-                    <span id="floorText">1</span>
-                </div>
-                <div class="status-item">
-                    <span>💰 Oro:</span>
-                    <span id="goldText">0</span>
-                </div>
-            </div>
-            
-            <div class="canvas-container">
-                <canvas id="gameCanvas" width="600" height="480"></canvas>
-            </div>
-        </div>
+    <!-- Pantalla de Inicio -->
+    <div id="startScreen" class="start-screen">
+        <h2>⚔️ SHATTERED PIXEL DUNGEON ⚔️</h2>
+        <p>Elige tu héroe:</p>
         
-        <div class="side-panel">
-            <div class="minimap">
-                <canvas id="minimapCanvas" width="200" height="200"></canvas>
+        <div class="hero-select">
+            <div class="hero-option selected" data-hero="warrior">
+                <img src="htmlfiles/assets/sprites/warrior.png" alt="Warrior">
+                <span>Guerrero</span>
             </div>
-            
-            <div class="log-panel" id="gameLog">
-                <div class="log-entry log-info">Bienvenido a Shattered Pixel Dungeon!</div>
-                <div class="log-entry log-info">Explora la mazmorra y sobrevive...</div>
+            <div class="hero-option" data-hero="mage">
+                <img src="htmlfiles/assets/sprites/mage.png" alt="Mage">
+                <span>Mago</span>
             </div>
-            
-            <div class="inventory-panel">
-                <h4>🎒 Inventario</h4>
-                <div class="inventory-grid" id="inventoryGrid"></div>
+            <div class="hero-option" data-hero="rogue">
+                <img src="htmlfiles/assets/sprites/rogue.png" alt="Rogue">
+                <span>Pícaro</span>
             </div>
-            
-            <div class="controls-panel">
-                <h4>🎮 Controles</h4>
-                <ul class="controls-list">
-                    <li><span>Mover/Atacar</span><span class="key">WASD / Flechas</span></li>
-                    <li><span>Esperar</span><span class="key">ESPACIO</span></li>
-                    <li><span>Recoger item</span><span class="key">G</span></li>
-                    <li><span>Usar poción</span><span class="key">R</span></li>
-                    <li><span>Descansar</span><span class="key">T</span></li>
-                </ul>
+            <div class="hero-option" data-hero="huntress">
+                <img src="htmlfiles/assets/sprites/huntress.png" alt="Huntress">
+                <span>Cazadora</span>
             </div>
         </div>
+
+        <p style="margin-top: 20px;">Controles:</p>
+        <p>WASD / Flechas - Moverse y Atacar</p>
+        <p>ESPACIO - Esperar turno</p>
+        <p>G - Recoger items</p>
+        <p>R - Usar poción</p>
+
+        <button class="btn-start" onclick="startGame()">¡A LA MAZMORRA!</button>
     </div>
-    
-    <div class="game-over" id="gameOverScreen">
-        <div class="game-over-content">
-            <h2>☠️ HAS MUERTO ☠️</h2>
-            <p id="deathStats"></p>
-            <button class="btn" onclick="game.restart()">Jugar de Nuevo</button>
+
+    <!-- Pantalla de Game Over -->
+    <div id="gameOverScreen" class="game-over-screen hidden">
+        <h2>💀 HAS MUERTO 💀</h2>
+        <p id="deathReason">Causa de muerte</p>
+        <p>Piso alcanzado: <span id="finalFloor" style="color: #44aaff;"></span></p>
+        <p>Nivel: <span id="finalLevel" style="color: #44ff44;"></span></p>
+        <p>Oro recolectado: <span id="finalGold" style="color: #ffd700;"></span></p>
+        <button class="btn-start" onclick="restartGame()">JUGAR DE NUEVO</button>
+    </div>
+
+    <div class="game-container" id="gameContainer">
+        <div class="main-panel">
+            <div class="header">
+                <h1>🏰 SHATTERED PIXEL DUNGEON 🏰</h1>
+                <div class="status-bar">
+                    <div class="status-item">
+                        <div class="status-label">VIDA</div>
+                        <div class="status-value hp-value"><span id="hpCurrent">20</span>/<span id="hpMax">20</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill hp-fill" id="hpBar" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">EXPERIENCIA</div>
+                        <div class="status-value xp-value">Nvl <span id="level">1</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill xp-fill" id="xpBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">ORO</div>
+                        <div class="status-value gold-value"><span id="gold">0</span> 💰</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">PISO</div>
+                        <div class="status-value floor-value"><span id="floor">1</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-canvas" id="gameCanvas"></div>
+
+            <div class="controls">
+                <button class="btn btn-action" onclick="waitTurn()">⏳ Esperar (Espacio)</button>
+                <button class="btn btn-item" onclick="pickUpItem()">📦 Recoger (G)</button>
+                <button class="btn btn-item" onclick="usePotion()">🧪 Usar Poción (R)</button>
+                <button class="btn btn-combat" onclick="rest()">😴 Descansar (T)</button>
+                <button class="btn btn-action" onclick="toggleMinimap()">🗺️ Minimapa</button>
+                <button class="btn btn-combat" onclick="restartGame()">🔄 Reiniciar</button>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <div class="panel-box">
+                <div class="panel-title">📜 Registro de Combate</div>
+                <div class="combat-log" id="combatLog"></div>
+            </div>
+
+            <div class="panel-box">
+                <div class="panel-title">🎒 Inventario</div>
+                <ul class="inventory-list" id="inventoryList"></ul>
+            </div>
+
+            <div class="panel-box">
+                <div class="panel-title">🗺️ Minimapa</div>
+                <div class="minimap" id="minimap"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // === SPRITE MANAGER ===
-        class SpriteManager {
-            constructor() {
-                this.sprites = {};
-                this.loaded = false;
-                this.loadQueue = [];
-            }
-            
-            async loadSprite(name, path) {
-                return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        this.sprites[name] = img;
-                        resolve(img);
-                    };
-                    img.onerror = () => {
-                        console.warn(`Failed to load sprite: ${path}`);
-                        resolve(null);
-                    };
-                    img.src = path;
-                });
-            }
-            
-            async loadAllSprites() {
-                const promises = [];
-                
-                // Cargar sprites de enemigos
-                const enemies = ['gnoll', 'crab', 'rat', 'bat', 'brute', 'shaman', 'thief', 'snake', 'spider', 'skeleton', 'warlock', 'monk', 'golem', 'elemental', 'wraith', 'spectre', 'bat', 'dm300', 'goo'];
-                enemies.forEach(name => {
-                    promises.push(this.loadSprite(`enemy_${name}`, `htmlfiles/assets/sprites/${name}.png`));
-                });
-                
-                // Cargar héroe
-                promises.push(this.loadSprite('hero_mage', 'htmlfiles/assets/sprites/mage.png'));
-                promises.push(this.loadSprite('hero_warrior', 'htmlfiles/assets/sprites/warrior.png'));
-                promises.push(this.loadSprite('hero_rogue', 'htmlfiles/assets/sprites/rogue.png'));
-                promises.push(this.loadSprite('hero_huntress', 'htmlfiles/assets/sprites/huntress.png'));
-                
-                // Cargar items
-                promises.push(this.loadSprite('item_gold', 'htmlfiles/assets/sprites/gold.png'));
-                promises.push(this.loadSprite('item_potion', 'htmlfiles/assets/sprites/potion.png'));
-                promises.push(this.loadSprite('item_scroll', 'htmlfiles/assets/sprites/scroll.png'));
-                promises.push(this.loadSprite('item_weapon', 'htmlfiles/assets/sprites/weapon.png'));
-                promises.push(this.loadSprite('item_armor', 'htmlfiles/assets/sprites/armor.png'));
-                promises.push(this.loadSprite('item_food', 'htmlfiles/assets/sprites/food.png'));
-                
-                // Cargar tiles
-                promises.push(this.loadSprite('tile_water', 'htmlfiles/assets/environment/water0.png'));
-                
-                await Promise.all(promises);
-                this.loaded = true;
-            }
-            
-            getSprite(name) {
-                return this.sprites[name] || null;
-            }
-        }
-
-        // === TILE TYPES ===
-        const TILES = {
-            VOID: 0,
-            FLOOR: 1,
-            WALL: 2,
-            DOOR: 3,
-            OPEN_DOOR: 4,
-            WATER: 5,
-            GRASS: 6,
-            STAIRS_UP: 7,
-            STAIRS_DOWN: 8,
-            CHEST: 9
-        };
-
-        // === GAME CONSTANTS ===
+        // ==================== CONFIGURACIÓN DEL JUEGO ====================
         const TILE_SIZE = 24;
         const MAP_WIDTH = 25;
         const MAP_HEIGHT = 20;
-        const VIEW_WIDTH = Math.ceil(600 / TILE_SIZE);
-        const VIEW_HEIGHT = Math.ceil(480 / TILE_SIZE);
+        const VIEW_DISTANCE = 8;
 
-        // === DUNGEON GENERATOR ===
-        class DungeonGenerator {
-            constructor(width, height) {
-                this.width = width;
-                this.height = height;
-            }
-            
-            generate(floor) {
-                const map = [];
-                for (let y = 0; y < this.height; y++) {
-                    map[y] = [];
-                    for (let x = 0; x < this.width; x++) {
-                        map[y][x] = TILES.WALL;
-                    }
-                }
-                
-                // Generar habitaciones
-                const rooms = [];
-                const numRooms = 5 + Math.floor(Math.random() * 4);
-                
-                for (let i = 0; i < numRooms; i++) {
-                    const roomWidth = 4 + Math.floor(Math.random() * 5);
-                    const roomHeight = 3 + Math.floor(Math.random() * 4);
-                    const roomX = 1 + Math.floor(Math.random() * (this.width - roomWidth - 2));
-                    const roomY = 1 + Math.floor(Math.random() * (this.height - roomHeight - 2));
-                    
-                    let overlaps = false;
-                    for (const room of rooms) {
-                        if (roomX < room.x + room.width + 1 &&
-                            roomX + roomWidth + 1 > room.x &&
-                            roomY < room.y + room.height + 1 &&
-                            roomY + roomHeight + 1 > room.y) {
-                            overlaps = true;
-                            break;
-                        }
-                    }
-                    
-                    if (!overlaps) {
-                        rooms.push({ x: roomX, y: roomY, width: roomWidth, height: roomHeight });
-                        
-                        for (let ry = roomY; ry < roomY + roomHeight; ry++) {
-                            for (let rx = roomX; rx < roomX + roomWidth; rx++) {
-                                map[ry][rx] = TILES.FLOOR;
-                            }
-                        }
-                    }
-                }
-                
-                // Conectar habitaciones con pasillos
-                for (let i = 1; i < rooms.length; i++) {
-                    const room1 = rooms[i - 1];
-                    const room2 = rooms[i];
-                    
-                    const x1 = Math.floor(room1.x + room1.width / 2);
-                    const y1 = Math.floor(room1.y + room1.height / 2);
-                    const x2 = Math.floor(room2.x + room2.width / 2);
-                    const y2 = Math.floor(room2.y + room2.height / 2);
-                    
-                    // Pasillo horizontal
-                    const minX = Math.min(x1, x2);
-                    const maxX = Math.max(x1, x2);
-                    for (let x = minX; x <= maxX; x++) {
-                        if (map[y1][x] === TILES.WALL) {
-                            map[y1][x] = TILES.FLOOR;
-                        }
-                    }
-                    
-                    // Pasillo vertical
-                    const minY = Math.min(y1, y2);
-                    const maxY = Math.max(y1, y2);
-                    for (let y = minY; y <= maxY; y++) {
-                        if (map[y][x2] === TILES.WALL) {
-                            map[y][x2] = TILES.FLOOR;
-                        }
-                    }
-                }
-                
-                // Colocar escaleras
-                if (rooms.length > 0) {
-                    const startRoom = rooms[0];
-                    const endRoom = rooms[rooms.length - 1];
-                    
-                    map[Math.floor(startRoom.y + startRoom.height / 2)]
-                       [Math.floor(startRoom.x + startRoom.width / 2)] = TILES.STAIRS_UP;
-                    
-                    map[Math.floor(endRoom.y + endRoom.height / 2)]
-                       [Math.floor(endRoom.x + endRoom.width / 2)] = TILES.STAIRS_DOWN;
-                }
-                
-                return { map, rooms };
-            }
-        }
+        // ==================== ESTADO DEL JUEGO ====================
+        let gameState = {
+            map: [],
+            explored: [],
+            visible: [],
+            entities: [],
+            items: [],
+            player: null,
+            floor: 1,
+            gameOver: false,
+            selectedHero: 'warrior'
+        };
 
-        // === ENTITY CLASSES ===
+        // ==================== SPRITES ====================
+        const sprites = {
+            tiles: {
+                floor: 'htmlfiles/assets/environment/tiles_sewers.png',
+                wall: 'htmlfiles/assets/environment/tiles_sewers.png',
+                water: 'htmlfiles/assets/environment/water0.png',
+                grass: 'htmlfiles/assets/environment/tiles_sewers.png',
+                door: 'htmlfiles/assets/environment/tiles_sewers.png',
+                stairs: 'htmlfiles/assets/environment/tiles_sewers.png'
+            },
+            heroes: {
+                warrior: 'htmlfiles/assets/sprites/warrior.png',
+                mage: 'htmlfiles/assets/sprites/mage.png',
+                rogue: 'htmlfiles/assets/sprites/rogue.png',
+                huntress: 'htmlfiles/assets/sprites/huntress.png'
+            },
+            enemies: {
+                rat: 'htmlfiles/assets/sprites/rat.png',
+                gnoll: 'htmlfiles/assets/sprites/gnoll.png',
+                crab: 'htmlfiles/assets/sprites/crab.png',
+                bat: 'htmlfiles/assets/sprites/bat.png',
+                brute: 'htmlfiles/assets/sprites/brute.png',
+                shaman: 'htmlfiles/assets/sprites/shaman.png',
+                skeleton: 'htmlfiles/assets/sprites/skeleton.png',
+                ghost: 'htmlfiles/assets/sprites/ghost.png',
+                elemental: 'htmlfiles/assets/sprites/elemental.png',
+                demon: 'htmlfiles/assets/sprites/demon.png',
+                goo: 'htmlfiles/assets/sprites/goo.png',
+                king: 'htmlfiles/assets/sprites/king.png'
+            },
+            items: {
+                gold: 'htmlfiles/assets/sprites/items.png',
+                potion: 'htmlfiles/assets/sprites/items.png',
+                food: 'htmlfiles/assets/sprites/items.png',
+                weapon: 'htmlfiles/assets/sprites/items.png',
+                armor: 'htmlfiles/assets/sprites/items.png',
+                amulet: 'htmlfiles/assets/sprites/amulet.png'
+            },
+            interfaces: {
+                health: 'htmlfiles/assets/interfaces/status_pane.png',
+                buffs: 'htmlfiles/assets/interfaces/buffs.png'
+            }
+        };
+
+        // ==================== CLASES ====================
         class Entity {
-            constructor(x, y, sprite) {
+            constructor(x, y, type, sprite, hp, damage, name) {
                 this.x = x;
                 this.y = y;
+                this.type = type;
                 this.sprite = sprite;
-                this.visible = true;
-            }
-        }
-
-        class Actor extends Entity {
-            constructor(x, y, sprite, hp, damage) {
-                super(x, y, sprite);
-                this.hp = hp;
                 this.maxHp = hp;
+                this.hp = hp;
                 this.damage = damage;
+                this.name = name;
                 this.level = 1;
                 this.xp = 0;
                 this.xpToNext = 20;
             }
-            
-            takeDamage(amount) {
-                this.hp -= amount;
-                if (this.hp < 0) this.hp = 0;
-                return this.hp <= 0;
+
+            move(dx, dy) {
+                const newX = this.x + dx;
+                const newY = this.y + dy;
+
+                if (newX < 0 || newX >= MAP_WIDTH || newY < 0 || newY >= MAP_HEIGHT) return false;
+                if (gameState.map[newY][newX] === 1) return false;
+
+                // Verificar colisión con otras entidades
+                const other = gameState.entities.find(e => e.x === newX && e.y === newY && e !== this);
+                if (other) {
+                    if (this.type === 'player' && other.type === 'enemy') {
+                        this.attack(other);
+                    } else if (this.type === 'enemy' && other.type === 'player') {
+                        this.attack(other);
+                    }
+                    return true;
+                }
+
+                this.x = newX;
+                this.y = newY;
+                return true;
             }
-            
-            heal(amount) {
-                this.hp += amount;
-                if (this.hp > this.maxHp) this.hp = this.maxHp;
+
+            attack(target) {
+                const damage = Math.max(1, this.damage + Math.floor(Math.random() * 3));
+                target.hp -= damage;
+                
+                if (this.type === 'player') {
+                    logCombat(`Atacas a ${target.name} por ${damage} daño`, 'player');
+                    showDamage(target.x, target.y, damage);
+                } else {
+                    logCombat(`${this.name} te ataca por ${damage} daño`, 'enemy');
+                    showDamage(this.x, this.y, damage);
+                }
+
+                if (target.hp <= 0) {
+                    this.kill(target);
+                }
             }
-            
-            gainXp(amount) {
-                this.xp += amount;
+
+            kill(target) {
+                if (target.type === 'enemy') {
+                    const xpGain = target.level * 5 + Math.floor(Math.random() * 5);
+                    this.xp += xpGain;
+                    logCombat(`¡${target.name} derrotado! +${xpGain} XP`, 'item');
+                    
+                    // Probabilidad de drop
+                    if (Math.random() < 0.3) {
+                        spawnItem(target.x, target.y, 'gold', Math.floor(Math.random() * 10) + 5);
+                    }
+                    if (Math.random() < 0.15) {
+                        spawnItem(target.x, target.y, 'potion');
+                    }
+
+                    gameState.entities = gameState.entities.filter(e => e !== target);
+                    
+                    if (this.type === 'player') {
+                        this.checkLevelUp();
+                    }
+                } else if (target.type === 'player') {
+                    gameOver(`${target.name} fue asesinado por ${this.name}`);
+                }
+            }
+
+            checkLevelUp() {
                 while (this.xp >= this.xpToNext) {
                     this.xp -= this.xpToNext;
                     this.level++;
-                    this.maxHp += 5;
-                    this.heal(5);
-                    this.damage += 1;
                     this.xpToNext = Math.floor(this.xpToNext * 1.5);
+                    this.maxHp += 5;
+                    this.hp = this.maxHp;
+                    this.damage += 2;
+                    logCombat(`¡SUBIDA DE NIVEL! Ahora eres nivel ${this.level}`, 'item');
+                    updateUI();
                 }
             }
-        }
 
-        class Hero extends Actor {
-            constructor(x, y) {
-                super(x, y, 'hero_warrior', 20, 3);
-                this.gold = 0;
-                this.inventory = [];
-                this.potions = 0;
+            heal(amount) {
+                this.hp = Math.min(this.maxHp, this.hp + amount);
+                logCombat(`Te curas ${amount} HP`, 'info');
             }
         }
 
-        class Enemy extends Actor {
-            constructor(x, y, type, floor) {
-                const stats = Enemy.getStats(type, floor);
-                super(x, y, `enemy_${type}`, stats.hp, stats.damage);
-                this.type = type;
-                this.xpValue = stats.xp;
-                this.state = 'idle';
-                this.lastMove = 0;
-            }
+        // ==================== FUNCIONES DEL JUEGO ====================
+        function initGame() {
+            gameState = {
+                map: [],
+                explored: [],
+                visible: [],
+                entities: [],
+                items: [],
+                player: null,
+                floor: 1,
+                gameOver: false,
+                selectedHero: gameState.selectedHero || 'warrior'
+            };
+
+            generateMap();
+            spawnPlayer();
+            spawnEnemies();
+            spawnItems();
+            updateVisibility();
+            updateUI();
+            render();
             
-            static getStats(type, floor) {
-                const base = {
-                    rat: { hp: 10, damage: 2, xp: 5 },
-                    gnoll: { hp: 15, damage: 3, xp: 8 },
-                    crab: { hp: 20, damage: 4, xp: 10 },
-                    bat: { hp: 12, damage: 4, xp: 9 },
-                    brute: { hp: 30, damage: 5, xp: 15 },
-                    shaman: { hp: 18, damage: 5, xp: 12 },
-                    thief: { hp: 16, damage: 4, xp: 11 },
-                    snake: { hp: 14, damage: 3, xp: 8 },
-                    spider: { hp: 13, damage: 3, xp: 7 },
-                    skeleton: { hp: 18, damage: 4, xp: 10 },
-                    warlock: { hp: 20, damage: 6, xp: 14 },
-                    monk: { hp: 22, damage: 5, xp: 13 },
-                    golem: { hp: 40, damage: 6, xp: 20 },
-                    elemental: { hp: 35, damage: 7, xp: 18 },
-                    wraith: { hp: 25, damage: 5, xp: 15 },
-                    spectre: { hp: 30, damage: 6, xp: 17 }
-                };
-                
-                const stats = base[type] || base.rat;
-                const multiplier = 1 + (floor - 1) * 0.1;
-                
-                return {
-                    hp: Math.floor(stats.hp * multiplier),
-                    damage: Math.floor(stats.damage * multiplier),
-                    xp: Math.floor(stats.xp * multiplier)
-                };
-            }
+            logCombat('¡Bienvenido a la Mazmorra!', 'info');
+            logCombat(`Explora los ${gameState.map[0].length} pisos de profundidad...`, 'info');
         }
 
-        class Item extends Entity {
-            constructor(x, y, type, value = 0) {
-                super(x, y, `item_${type}`);
-                this.type = type;
-                this.value = value;
+        function generateMap() {
+            gameState.map = [];
+            gameState.explored = [];
+            
+            for (let y = 0; y < MAP_HEIGHT; y++) {
+                gameState.map[y] = [];
+                gameState.explored[y] = [];
+                for (let x = 0; x < MAP_WIDTH; x++) {
+                    // Bordes son paredes
+                    if (x === 0 || x === MAP_WIDTH - 1 || y === 0 || y === MAP_HEIGHT - 1) {
+                        gameState.map[y][x] = 1;
+                    } else {
+                        // Generación procedural simple
+                        gameState.map[y][x] = Math.random() < 0.2 ? 1 : 0;
+                    }
+                    gameState.explored[y][x] = false;
+                }
             }
-        }
 
-        // === MAIN GAME CLASS ===
-        class Game {
-            constructor() {
-                this.canvas = document.getElementById('gameCanvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.minimapCanvas = document.getElementById('minimapCanvas');
-                this.minimapCtx = this.minimapCanvas.getContext('2d');
-                
-                this.spriteManager = new SpriteManager();
-                this.dungeonGenerator = new DungeonGenerator(MAP_WIDTH, MAP_HEIGHT);
-                
-                this.map = [];
-                this.rooms = [];
-                this.hero = null;
-                this.enemies = [];
-                this.items = [];
-                this.floor = 1;
-                this.gameOver = false;
-                
-                this.cameraX = 0;
-                this.cameraY = 0;
-                
-                this.setupControls();
-                this.start();
-            }
+            // Crear habitaciones
+            const rooms = [];
+            const numRooms = 5 + Math.floor(Math.random() * 4);
             
-            async start() {
-                await this.spriteManager.loadAllSprites();
-                this.log('Cargando sprites...', 'info');
-                this.newFloor();
-                this.render();
-                this.renderMinimap();
-                this.updateUI();
-                this.log('¡Comienza la aventura!', 'info');
-            }
-            
-            restart() {
-                this.floor = 1;
-                this.gameOver = false;
-                this.hero = new Hero(10, 10);
-                document.getElementById('gameOverScreen').style.display = 'none';
-                document.getElementById('gameLog').innerHTML = '';
-                this.newFloor();
-                this.render();
-                this.renderMinimap();
-                this.updateUI();
-                this.log('=== Nueva Partida ===', 'info');
-            }
-            
-            newFloor() {
-                const { map, rooms } = this.dungeonGenerator.generate(this.floor);
-                this.map = map;
-                this.rooms = rooms;
-                this.enemies = [];
-                this.items = [];
-                
-                // Posicionar héroe
-                if (!this.hero) {
-                    this.hero = new Hero(10, 10);
-                } else {
-                    const stairsUp = this.findTile(TILES.STAIRS_UP);
-                    if (stairsUp) {
-                        this.hero.x = stairsUp.x;
-                        this.hero.y = stairsUp.y;
+            for (let i = 0; i < numRooms; i++) {
+                const roomW = 4 + Math.floor(Math.random() * 5);
+                const roomH = 3 + Math.floor(Math.random() * 4);
+                const roomX = 2 + Math.floor(Math.random() * (MAP_WIDTH - roomW - 4));
+                const roomY = 2 + Math.floor(Math.random() * (MAP_HEIGHT - roomH - 4));
+
+                for (let y = roomY; y < roomY + roomH; y++) {
+                    for (let x = roomX; x < roomX + roomW; x++) {
+                        gameState.map[y][x] = 0;
                     }
                 }
+                rooms.push({ x: roomX, y: roomY, w: roomW, h: roomH });
+            }
+
+            // Conectar habitaciones con pasillos
+            for (let i = 0; i < rooms.length - 1; i++) {
+                const room1 = rooms[i];
+                const room2 = rooms[i + 1];
                 
-                // Generar enemigos
-                const enemyTypes = ['rat', 'gnoll', 'crab', 'bat', 'brute', 'shaman'];
-                const numEnemies = 3 + Math.floor(this.floor / 2);
-                
-                for (let i = 0; i < numEnemies; i++) {
-                    const pos = this.getRandomFloorTile();
-                    if (pos && this.distance(pos.x, pos.y, this.hero.x, this.hero.y) > 5) {
-                        const type = enemyTypes[Math.floor(Math.random() * Math.min(enemyTypes.length, 3 + Math.floor(this.floor / 3)))];
-                        this.enemies.push(new Enemy(pos.x, pos.y, type, this.floor));
+                const x1 = Math.floor(room1.x + room1.w / 2);
+                const y1 = Math.floor(room1.y + room1.h / 2);
+                const x2 = Math.floor(room2.x + room2.w / 2);
+                const y2 = Math.floor(room2.y + room2.h / 2);
+
+                // Pasillo horizontal primero
+                const minX = Math.min(x1, x2);
+                const maxX = Math.max(x1, x2);
+                for (let x = minX; x <= maxX; x++) {
+                    gameState.map[y1][x] = 0;
+                }
+
+                // Pasillo vertical
+                const minY = Math.min(y1, y2);
+                const maxY = Math.max(y1, y2);
+                for (let y = minY; y <= maxY; y++) {
+                    gameState.map[y][x2] = 0;
+                }
+            }
+
+            // Asegurar área alrededor del jugador
+            const startX = Math.floor(MAP_WIDTH / 2);
+            const startY = Math.floor(MAP_HEIGHT / 2);
+            for (let y = startY - 2; y <= startY + 2; y++) {
+                for (let x = startX - 2; x <= startX + 2; x++) {
+                    if (y >= 0 && y < MAP_HEIGHT && x >= 0 && x < MAP_WIDTH) {
+                        gameState.map[y][x] = 0;
                     }
                 }
+            }
+        }
+
+        function spawnPlayer() {
+            let startX, startY;
+            do {
+                startX = Math.floor(MAP_WIDTH / 2);
+                startY = Math.floor(MAP_HEIGHT / 2);
+            } while (gameState.map[startY][startX] === 1);
+
+            const heroStats = {
+                warrior: { hp: 25, damage: 4 },
+                mage: { hp: 18, damage: 6 },
+                rogue: { hp: 20, damage: 5 },
+                huntress: { hp: 22, damage: 5 }
+            };
+
+            const stats = heroStats[gameState.selectedHero];
+            gameState.player = new Entity(
+                startX, startY, 'player',
+                sprites.heroes[gameState.selectedHero],
+                stats.hp, stats.damage,
+                gameState.selectedHero.charAt(0).toUpperCase() + gameState.selectedHero.slice(1)
+            );
+            gameState.entities.push(gameState.player);
+        }
+
+        function spawnEnemies() {
+            const enemyTypes = [
+                { name: 'Rata', sprite: sprites.enemies.rat, hp: 10, damage: 2, chance: 0.3 },
+                { name: 'Gnoll', sprite: sprites.enemies.gnoll, hp: 15, damage: 3, chance: 0.25 },
+                { name: 'Cangrejo', sprite: sprites.enemies.crab, hp: 20, damage: 4, chance: 0.2 },
+                { name: 'Murciélago', sprite: sprites.enemies.bat, hp: 12, damage: 3, chance: 0.15 },
+                { name: 'Bruto', sprite: sprites.enemies.brute, hp: 30, damage: 5, chance: 0.1 }
+            ];
+
+            const numEnemies = 5 + gameState.floor * 2;
+            
+            for (let i = 0; i < numEnemies; i++) {
+                let x, y;
+                do {
+                    x = Math.floor(Math.random() * MAP_WIDTH);
+                    y = Math.floor(Math.random() * MAP_HEIGHT);
+                } while (
+                    gameState.map[y][x] === 1 ||
+                    (Math.abs(x - gameState.player.x) < 5 && Math.abs(y - gameState.player.y) < 5) ||
+                    gameState.entities.some(e => e.x === x && e.y === y)
+                );
+
+                const rand = Math.random();
+                let cumulative = 0;
+                let selectedEnemy = enemyTypes[0];
                 
-                // Generar items
-                const numItems = 2 + Math.floor(Math.random() * 3);
-                for (let i = 0; i < numItems; i++) {
-                    const pos = this.getRandomFloorTile();
-                    if (pos) {
-                        const rand = Math.random();
-                        if (rand < 0.4) {
-                            this.items.push(new Item(pos.x, pos.y, 'gold', 5 + Math.floor(Math.random() * 15)));
-                        } else if (rand < 0.7) {
-                            this.items.push(new Item(pos.x, pos.y, 'potion'));
-                        } else {
-                            this.items.push(new Item(pos.x, pos.y, 'food'));
+                for (const enemy of enemyTypes) {
+                    cumulative += enemy.chance;
+                    if (rand <= cumulative) {
+                        selectedEnemy = enemy;
+                        break;
+                    }
+                }
+
+                const enemy = new Entity(
+                    x, y, 'enemy',
+                    selectedEnemy.sprite,
+                    selectedEnemy.hp + gameState.floor * 2,
+                    selectedEnemy.damage + Math.floor(gameState.floor / 2),
+                    selectedEnemy.name
+                );
+                enemy.level = 1 + Math.floor(gameState.floor / 3);
+                gameState.entities.push(enemy);
+            }
+        }
+
+        function spawnItems() {
+            const numItems = 3 + Math.floor(Math.random() * 4);
+            
+            for (let i = 0; i < numItems; i++) {
+                let x, y;
+                do {
+                    x = Math.floor(Math.random() * MAP_WIDTH);
+                    y = Math.floor(Math.random() * MAP_HEIGHT);
+                } while (
+                    gameState.map[y][x] === 1 ||
+                    gameState.items.some(item => item.x === x && item.y === y)
+                );
+
+                const itemType = Math.random() < 0.5 ? 'gold' : (Math.random() < 0.7 ? 'potion' : 'food');
+                spawnItem(x, y, itemType);
+            }
+        }
+
+        function spawnItem(x, y, type, value = null) {
+            gameState.items.push({
+                x, y, type,
+                value: value || (type === 'gold' ? Math.floor(Math.random() * 10) + 5 : null),
+                sprite: sprites.items[type]
+            });
+        }
+
+        function updateVisibility() {
+            gameState.visible = [];
+            for (let y = 0; y < MAP_HEIGHT; y++) {
+                gameState.visible[y] = [];
+                for (let x = 0; x < MAP_WIDTH; x++) {
+                    gameState.visible[y][x] = false;
+                }
+            }
+
+            // Algoritmo simple de visibilidad
+            for (let dy = -VIEW_DISTANCE; dy <= VIEW_DISTANCE; dy++) {
+                for (let dx = -VIEW_DISTANCE; dx <= VIEW_DISTANCE; dx++) {
+                    const x = gameState.player.x + dx;
+                    const y = gameState.player.y + dy;
+                    
+                    if (x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
+                        if (dx * dx + dy * dy <= VIEW_DISTANCE * VIEW_DISTANCE) {
+                            if (hasLineOfSight(gameState.player.x, gameState.player.y, x, y)) {
+                                gameState.visible[y][x] = true;
+                                gameState.explored[y][x] = true;
+                            }
                         }
                     }
                 }
-                
-                this.log(`=== Piso ${this.floor} ===`, 'info');
             }
-            
-            getRandomFloorTile() {
-                const attempts = 50;
-                for (let i = 0; i < attempts; i++) {
-                    const x = Math.floor(Math.random() * MAP_WIDTH);
-                    const y = Math.floor(Math.random() * MAP_HEIGHT);
-                    if (this.map[y][x] === TILES.FLOOR && !this.getEnemyAt(x, y)) {
-                        return { x, y };
-                    }
-                }
-                return null;
-            }
-            
-            findTile(tileType) {
-                for (let y = 0; y < MAP_HEIGHT; y++) {
-                    for (let x = 0; x < MAP_WIDTH; x++) {
-                        if (this.map[y][x] === tileType) {
-                            return { x, y };
-                        }
-                    }
-                }
-                return null;
-            }
-            
-            distance(x1, y1, x2, y2) {
-                return Math.abs(x1 - x2) + Math.abs(y1 - y2);
-            }
-            
-            setupControls() {
-                document.addEventListener('keydown', (e) => {
-                    if (this.gameOver) return;
-                    
-                    let dx = 0, dy = 0;
-                    let acted = false;
-                    
-                    switch(e.key) {
-                        case 'ArrowUp': case 'w': case 'W': dy = -1; break;
-                        case 'ArrowDown': case 's': case 'S': dy = 1; break;
-                        case 'ArrowLeft': case 'a': case 'A': dx = -1; break;
-                        case 'ArrowRight': case 'd': case 'D': dx = 1; break;
-                        case ' ': 
-                            this.log('Esperas un turno...', 'info');
-                            acted = true;
-                            break;
-                        case 'g': case 'G':
-                            this.pickupItem();
-                            acted = true;
-                            break;
-                        case 'r': case 'R':
-                            this.usePotion();
-                            acted = true;
-                            break;
-                        case 't': case 'T':
-                            this.rest();
-                            acted = true;
-                            break;
-                    }
-                    
-                    if (dx !== 0 || dy !== 0) {
-                        this.moveHero(dx, dy);
-                        acted = true;
-                    }
-                    
-                    if (acted) {
-                        this.processEnemies();
-                        this.render();
-                        this.renderMinimap();
-                        this.updateUI();
-                    }
-                });
-            }
-            
-            moveHero(dx, dy) {
-                const newX = this.hero.x + dx;
-                const newY = this.hero.y + dy;
-                
-                // Verificar colisión con paredes
-                if (this.map[newY][newX] === TILES.WALL) {
-                    return;
-                }
-                
-                // Verificar enemigo
-                const enemy = this.getEnemyAt(newX, newY);
-                if (enemy) {
-                    this.attackEnemy(enemy);
-                    return;
-                }
-                
-                // Mover
-                this.hero.x = newX;
-                this.hero.y = newY;
-                
-                // Verificar escaleras
-                if (this.map[newY][newX] === TILES.STAIRS_DOWN) {
-                    this.floor++;
-                    this.newFloor();
+        }
+
+        function hasLineOfSight(x0, y0, x1, y1) {
+            const dx = Math.abs(x1 - x0);
+            const dy = Math.abs(y1 - y0);
+            const sx = x0 < x1 ? 1 : -1;
+            const sy = y0 < y1 ? 1 : -1;
+            let err = Math.floor(dx / 2);
+            let y = y0;
+
+            for (let x = x0; x !== x1 + sx; x += sx) {
+                if (gameState.map[y][x] === 1) return false;
+                err -= dy;
+                if (err < 0) {
+                    y += sy;
+                    err += dx;
                 }
             }
-            
-            attackEnemy(enemy) {
-                const damage = this.hero.damage + Math.floor(Math.random() * 2);
-                const killed = enemy.takeDamage(damage);
-                
-                this.log(`Atacas al ${enemy.type} por ${damage} daño`, 'combat');
-                
-                if (killed) {
-                    this.log(`¡${enemy.type} derrotado! +${enemy.xpValue} XP`, 'level');
-                    this.hero.gainXp(enemy.xpValue);
-                    this.enemies = this.enemies.filter(e => e !== enemy);
-                }
-            }
-            
-            processEnemies() {
-                for (const enemy of this.enemies) {
-                    const dist = this.distance(enemy.x, enemy.y, this.hero.x, this.hero.y);
+            return true;
+        }
+
+        function updateEnemies() {
+            gameState.entities.forEach(entity => {
+                if (entity.type === 'enemy') {
+                    const dist = Math.abs(entity.x - gameState.player.x) + Math.abs(entity.y - gameState.player.y);
                     
                     if (dist <= 1) {
-                        // Atacar héroe
-                        const damage = Math.max(1, enemy.damage - Math.floor(Math.random()));
-                        this.hero.takeDamage(damage);
-                        this.log(`${enemy.type} te ataca por ${damage} daño`, 'danger');
+                        entity.attack(gameState.player);
+                    } else if (dist <= VIEW_DISTANCE && gameState.visible[entity.y][entity.x]) {
+                        // IA simple: mover hacia el jugador
+                        const dx = gameState.player.x > entity.x ? 1 : (gameState.player.x < entity.x ? -1 : 0);
+                        const dy = gameState.player.y > entity.y ? 1 : (gameState.player.y < entity.y ? -1 : 0);
                         
-                        if (this.hero.hp <= 0) {
-                            this.endGame();
-                        }
-                    } else if (dist <= 8) {
-                        // Perseguir héroe
-                        const dx = Math.sign(this.hero.x - enemy.x);
-                        const dy = Math.sign(this.hero.y - enemy.y);
-                        
-                        let newX = enemy.x + dx;
-                        let newY = enemy.y + dy;
-                        
-                        if (this.canMoveTo(newX, newY)) {
-                            enemy.x = newX;
-                            enemy.y = newY;
-                        } else if (dx !== 0 && this.canMoveTo(enemy.x, enemy.y + dy)) {
-                            enemy.y += dy;
-                        } else if (dy !== 0 && this.canMoveTo(enemy.x + dx, enemy.y)) {
-                            enemy.x += dx;
-                        }
+                        if (dx !== 0 && entity.move(dx, 0)) return;
+                        if (dy !== 0 && entity.move(0, dy)) return;
                     }
                 }
-            }
+            });
+        }
+
+        function processTurn() {
+            if (gameState.gameOver) return;
+
+            updateEnemies();
+            updateVisibility();
             
-            canMoveTo(x, y) {
-                return this.map[y][x] !== TILES.WALL && !this.getEnemyAt(x, y) && !(x === this.hero.x && y === this.hero.y);
+            // Verificar si hay escaleras para bajar
+            if (gameState.player.x === Math.floor(MAP_WIDTH / 2) && 
+                gameState.player.y === Math.floor(MAP_HEIGHT / 2)) {
+                // No hacer nada automático, el jugador debe recoger items manualmente
             }
-            
-            getEnemyAt(x, y) {
-                return this.enemies.find(e => e.x === x && e.y === y);
-            }
-            
-            pickupItem() {
-                const itemIndex = this.items.findIndex(i => i.x === this.hero.x && i.y === this.hero.y);
-                if (itemIndex === -1) {
-                    this.log('No hay nada aquí', 'info');
-                    return;
-                }
-                
-                const item = this.items[itemIndex];
-                
-                if (item.type === 'gold') {
-                    this.hero.gold += item.value;
-                    this.log(`Recogiste ${item.value} oro`, 'item');
-                } else if (item.type === 'potion') {
-                    this.hero.potions++;
-                    this.log('Recogiste una poción (R para usar)', 'item');
-                } else if (item.type === 'food') {
-                    this.hero.heal(5);
-                    this.log('Comiste comida (+5 HP)', 'item');
-                }
-                
-                this.items.splice(itemIndex, 1);
-            }
-            
-            usePotion() {
-                if (this.hero.potions > 0) {
-                    this.hero.potions--;
-                    const healAmount = 10 + Math.floor(Math.random() * 5);
-                    this.hero.heal(healAmount);
-                    this.log(`Bebiste una poción (+${healAmount} HP)`, 'item');
-                } else {
-                    this.log('No tienes pociones', 'info');
-                }
-            }
-            
-            rest() {
-                let healed = false;
-                if (this.hero.hp < this.hero.maxHp) {
-                    this.hero.heal(2);
-                    healed = true;
-                }
-                this.log(healed ? 'Descansas y recuperas 2 HP' : 'Descansas...', 'info');
-            }
-            
-            endGame() {
-                this.gameOver = true;
-                document.getElementById('deathStats').innerHTML = `
-                    <p>Piso alcanzado: ${this.floor}</p>
-                    <p>Nivel: ${this.hero.level}</p>
-                    <p>Oro: ${this.hero.gold}</p>
-                `;
-                document.getElementById('gameOverScreen').style.display = 'flex';
-                this.log('☠️ HAS MUERTO ☠️', 'danger');
-            }
-            
-            log(message, type = 'info') {
-                const logPanel = document.getElementById('gameLog');
-                const entry = document.createElement('div');
-                entry.className = `log-entry log-${type}`;
-                entry.textContent = message;
-                logPanel.appendChild(entry);
-                logPanel.scrollTop = logPanel.scrollHeight;
-            }
-            
-            updateUI() {
-                const hpPercent = (this.hero.hp / this.hero.maxHp) * 100;
-                const xpPercent = (this.hero.xp / this.hero.xpToNext) * 100;
-                
-                document.getElementById('hpFill').style.width = `${hpPercent}%`;
-                document.getElementById('hpText').textContent = `${this.hero.hp}/${this.hero.maxHp}`;
-                document.getElementById('xpFill').style.width = `${xpPercent}%`;
-                document.getElementById('levelText').textContent = this.hero.level;
-                document.getElementById('floorText').textContent = this.floor;
-                document.getElementById('goldText').textContent = this.hero.gold;
-                
-                // Actualizar inventario
-                const invGrid = document.getElementById('inventoryGrid');
-                invGrid.innerHTML = '';
-                for (let i = 0; i < 20; i++) {
-                    const slot = document.createElement('div');
-                    slot.className = 'inventory-slot';
-                    if (i < this.hero.potions) {
-                        slot.textContent = '🧪';
-                    }
-                    invGrid.appendChild(slot);
-                }
-            }
-            
-            render() {
-                this.ctx.fillStyle = '#000';
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                
-                // Calcular cámara
-                this.cameraX = Math.max(0, Math.min(this.hero.x - Math.floor(VIEW_WIDTH / 2), MAP_WIDTH - VIEW_WIDTH));
-                this.cameraY = Math.max(0, Math.min(this.hero.y - Math.floor(VIEW_HEIGHT / 2), MAP_HEIGHT - VIEW_HEIGHT));
-                
-                // Renderizar mapa
-                for (let y = 0; y < VIEW_HEIGHT; y++) {
-                    for (let x = 0; x < VIEW_WIDTH; x++) {
-                        const mapX = x + this.cameraX;
-                        const mapY = y + this.cameraY;
-                        
-                        if (mapY >= MAP_HEIGHT || mapX >= MAP_WIDTH) continue;
-                        
-                        const tile = this.map[mapY][mapX];
-                        const screenX = x * TILE_SIZE;
-                        const screenY = y * TILE_SIZE;
-                        
-                        // Dibujar tile
-                        this.drawTile(tile, screenX, screenY);
-                    }
-                }
-                
-                // Renderizar items
-                for (const item of this.items) {
-                    const screenX = (item.x - this.cameraX) * TILE_SIZE;
-                    const screenY = (item.y - this.cameraY) * TILE_SIZE;
-                    
-                    if (screenX >= 0 && screenX < this.canvas.width &&
-                        screenY >= 0 && screenY < this.canvas.height) {
-                        this.drawItem(item, screenX, screenY);
-                    }
-                }
-                
-                // Renderizar enemigos
-                for (const enemy of this.enemies) {
-                    const screenX = (enemy.x - this.cameraX) * TILE_SIZE;
-                    const screenY = (enemy.y - this.cameraY) * TILE_SIZE;
-                    
-                    if (screenX >= 0 && screenX < this.canvas.width &&
-                        screenY >= 0 && screenY < this.canvas.height) {
-                        this.drawEnemy(enemy, screenX, screenY);
-                    }
-                }
-                
-                // Renderizar héroe
-                const heroScreenX = (this.hero.x - this.cameraX) * TILE_SIZE;
-                const heroScreenY = (this.hero.y - this.cameraY) * TILE_SIZE;
-                this.drawHero(heroScreenX, heroScreenY);
-            }
-            
-            drawTile(tile, x, y) {
-                const ctx = this.ctx;
-                
-                switch(tile) {
-                    case TILES.WALL:
-                        ctx.fillStyle = '#4a4a6a';
-                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                        ctx.fillStyle = '#5a5a7a';
-                        ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-                        break;
-                    case TILES.FLOOR:
-                        ctx.fillStyle = '#3a3a5a';
-                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                        ctx.fillStyle = '#4a4a6a';
-                        ctx.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
-                        break;
-                    case TILES.STAIRS_DOWN:
-                        ctx.fillStyle = '#3a3a5a';
-                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                        ctx.fillStyle = '#8a8aaa';
-                        ctx.beginPath();
-                        ctx.moveTo(x + 4, y + 16);
-                        ctx.lineTo(x + 12, y + 8);
-                        ctx.lineTo(x + 20, y + 16);
-                        ctx.fill();
-                        break;
-                    case TILES.STAIRS_UP:
-                        ctx.fillStyle = '#3a3a5a';
-                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                        ctx.fillStyle = '#8a8aaa';
-                        ctx.beginPath();
-                        ctx.moveTo(x + 4, y + 8);
-                        ctx.lineTo(x + 12, y + 16);
-                        ctx.lineTo(x + 20, y + 8);
-                        ctx.fill();
-                        break;
-                    case TILES.DOOR:
-                        ctx.fillStyle = '#5a4a3a';
-                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                        break;
-                    default:
-                        ctx.fillStyle = '#2a2a4a';
-                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                }
-            }
-            
-            drawHero(x, y) {
-                const sprite = this.spriteManager.getSprite('hero_warrior');
-                if (sprite) {
-                    this.ctx.drawImage(sprite, x, y, TILE_SIZE, TILE_SIZE);
-                } else {
-                    this.ctx.fillStyle = '#4a9eff';
-                    this.ctx.beginPath();
-                    this.ctx.arc(x + TILE_SIZE/2, y + TILE_SIZE/2, TILE_SIZE/2 - 2, 0, Math.PI * 2);
-                    this.ctx.fill();
-                }
-            }
-            
-            drawEnemy(enemy, x, y) {
-                const sprite = this.spriteManager.getSprite(`enemy_${enemy.type}`);
-                if (sprite) {
-                    this.ctx.drawImage(sprite, x, y, TILE_SIZE, TILE_SIZE);
-                } else {
-                    this.ctx.fillStyle = '#ff4444';
-                    this.ctx.beginPath();
-                    this.ctx.arc(x + TILE_SIZE/2, y + TILE_SIZE/2, TILE_SIZE/2 - 2, 0, Math.PI * 2);
-                    this.ctx.fill();
-                }
-                
-                // Barra de HP del enemigo
-                const hpPercent = enemy.hp / enemy.maxHp;
-                this.ctx.fillStyle = '#333';
-                this.ctx.fillRect(x, y - 4, TILE_SIZE, 3);
-                this.ctx.fillStyle = hpPercent > 0.5 ? '#4f4' : '#f44';
-                this.ctx.fillRect(x, y - 4, TILE_SIZE * hpPercent, 3);
-            }
-            
-            drawItem(item, x, y) {
-                const sprite = this.spriteManager.getSprite(`item_${item.type}`);
-                if (sprite) {
-                    this.ctx.drawImage(sprite, x, y, TILE_SIZE, TILE_SIZE);
-                } else {
-                    switch(item.type) {
-                        case 'gold':
-                            this.ctx.fillStyle = '#ffd700';
-                            this.ctx.beginPath();
-                            this.ctx.arc(x + TILE_SIZE/2, y + TILE_SIZE/2, 6, 0, Math.PI * 2);
-                            this.ctx.fill();
-                            break;
-                        case 'potion':
-                            this.ctx.fillStyle = '#ff6b6b';
-                            this.ctx.fillRect(x + 8, y + 4, 8, 14);
-                            break;
-                        case 'food':
-                            this.ctx.fillStyle = '#8b4513';
-                            this.ctx.beginPath();
-                            this.ctx.ellipse(x + TILE_SIZE/2, y + TILE_SIZE/2, 8, 6, 0, 0, Math.PI * 2);
-                            this.ctx.fill();
-                            break;
-                    }
-                }
-            }
-            
-            renderMinimap() {
-                const ctx = this.minimapCtx;
-                const scale = 200 / Math.max(MAP_WIDTH, MAP_HEIGHT);
-                
-                ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, 200, 200);
-                
-                // Dibujar mapa
-                for (let y = 0; y < MAP_HEIGHT; y++) {
-                    for (let x = 0; x < MAP_WIDTH; x++) {
-                        const tile = this.map[y][x];
-                        if (tile === TILES.WALL) {
-                            ctx.fillStyle = '#444';
-                        } else if (tile === TILES.STAIRS_DOWN) {
-                            ctx.fillStyle = '#0f0';
-                        } else if (tile === TILES.STAIRS_UP) {
-                            ctx.fillStyle = '#00f';
-                        } else {
-                            ctx.fillStyle = '#666';
-                        }
-                        ctx.fillRect(x * scale, y * scale, scale, scale);
-                    }
-                }
-                
-                // Dibujar enemigos
-                ctx.fillStyle = '#f00';
-                for (const enemy of this.enemies) {
-                    ctx.fillRect(enemy.x * scale, enemy.y * scale, scale, scale);
-                }
-                
-                // Dibujar héroe
-                ctx.fillStyle = '#0ff';
-                ctx.fillRect(this.hero.x * scale, this.hero.y * scale, scale + 2, scale + 2);
+
+            updateUI();
+            render();
+
+            // Verificar victoria del piso (derrotar todos los enemigos)
+            const enemiesLeft = gameState.entities.filter(e => e.type === 'enemy').length;
+            if (enemiesLeft === 0) {
+                logCombat('¡Todos los enemigos derrotados! Busca las escaleras...', 'info');
             }
         }
 
-        // === START GAME ===
-        const game = new Game();
+        // ==================== CONTROLES ====================
+        function movePlayer(dx, dy) {
+            if (gameState.gameOver) return;
+            
+            const newX = gameState.player.x + dx;
+            const newY = gameState.player.y + dy;
+
+            if (newX < 0 || newX >= MAP_WIDTH || newY < 0 || newY >= MAP_HEIGHT) return;
+            if (gameState.map[newY][newX] === 1) return;
+
+            const enemy = gameState.entities.find(e => e.x === newX && e.y === newY && e.type === 'enemy');
+            if (enemy) {
+                gameState.player.attack(enemy);
+            } else {
+                gameState.player.x = newX;
+                gameState.player.y = newY;
+            }
+
+            processTurn();
+        }
+
+        function waitTurn() {
+            if (gameState.gameOver) return;
+            logCombat('Esperas un turno...', 'info');
+            processTurn();
+        }
+
+        function pickUpItem() {
+            if (gameState.gameOver) return;
+
+            const itemIndex = gameState.items.findIndex(
+                item => item.x === gameState.player.x && item.y === gameState.player.y
+            );
+
+            if (itemIndex !== -1) {
+                const item = gameState.items[itemIndex];
+                
+                switch (item.type) {
+                    case 'gold':
+                        logCombat(`Recoges ${item.value} de oro`, 'item');
+                        break;
+                    case 'potion':
+                        logCombat('Recoges una poción de cura', 'item');
+                        break;
+                    case 'food':
+                        logCombat('Recoges comida', 'item');
+                        break;
+                }
+
+                gameState.items.splice(itemIndex, 1);
+                updateUI();
+                render();
+            } else {
+                logCombat('No hay nada aquí para recoger', 'info');
+            }
+        }
+
+        function usePotion() {
+            if (gameState.gameOver) return;
+            
+            const hasPotion = gameState.items.some(item => item.type === 'potion');
+            if (hasPotion) {
+                gameState.player.heal(10);
+                gameState.items = gameState.items.filter(item => item.type !== 'potion');
+                updateUI();
+            } else {
+                logCombat('No tienes pociones', 'info');
+            }
+        }
+
+        function rest() {
+            if (gameState.gameOver) return;
+            
+            if (gameState.player.hp < gameState.player.maxHp) {
+                gameState.player.heal(2);
+                logCombat('Descansas un poco...', 'info');
+                processTurn();
+            } else {
+                logCombat('Tu vida está completa', 'info');
+            }
+        }
+
+        function nextFloor() {
+            gameState.floor++;
+            logCombat(`Bajas al piso ${gameState.floor}`, 'info');
+            generateMap();
+            gameState.player.x = Math.floor(MAP_WIDTH / 2);
+            gameState.player.y = Math.floor(MAP_HEIGHT / 2);
+            spawnEnemies();
+            spawnItems();
+            updateVisibility();
+            updateUI();
+            render();
+        }
+
+        // ==================== RENDERIZADO ====================
+        function render() {
+            const canvas = document.getElementById('gameCanvas');
+            canvas.innerHTML = '';
+
+            for (let y = 0; y < MAP_HEIGHT; y++) {
+                for (let x = 0; x < MAP_WIDTH; x++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    
+                    // Determinar tipo de terreno
+                    let tileSprite = sprites.tiles.floor;
+                    if (gameState.map[y][x] === 1) {
+                        tileSprite = sprites.tiles.wall;
+                    }
+
+                    // Visibilidad
+                    if (!gameState.explored[y][x]) {
+                        tile.classList.add('fog');
+                    } else if (!gameState.visible[y][x]) {
+                        tile.classList.add('explored');
+                    }
+
+                    // Renderizar sprite del terreno (solo si es visible)
+                    if (gameState.visible[y][x]) {
+                        const img = document.createElement('img');
+                        img.src = tileSprite;
+                        img.style.clip = `rect(${Math.floor(y % 4) * 24}px, ${Math.floor(x % 8) * 24 + 24}px, ${Math.floor(y % 4) * 24 + 24}px, ${Math.floor(x % 8) * 24}px)`;
+                        tile.appendChild(img);
+                    }
+
+                    // Renderizar items
+                    const item = gameState.items.find(i => i.x === x && i.y === y);
+                    if (item && gameState.visible[y][x]) {
+                        const itemImg = document.createElement('img');
+                        itemImg.className = 'entity';
+                        itemImg.src = item.sprite;
+                        itemImg.style.clip = item.type === 'gold' ? 'rect(0px, 24px, 24px, 0px)' : 'rect(0px, 48px, 24px, 24px)';
+                        tile.appendChild(itemImg);
+                    }
+
+                    // Renderizar entidades
+                    const entity = gameState.entities.find(e => e.x === x && e.y === y);
+                    if (entity && gameState.visible[y][x]) {
+                        const entityImg = document.createElement('img');
+                        entityImg.className = 'entity';
+                        entityImg.src = entity.sprite;
+                        tile.appendChild(entityImg);
+                    }
+
+                    canvas.appendChild(tile);
+                }
+            }
+
+            renderMinimap();
+        }
+
+        function renderMinimap() {
+            const minimap = document.getElementById('minimap');
+            minimap.innerHTML = '';
+
+            for (let y = 0; y < MAP_HEIGHT; y++) {
+                for (let x = 0; x < MAP_WIDTH; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'minimap-cell';
+
+                    if (!gameState.explored[y][x]) {
+                        cell.style.background = '#000';
+                    } else if (gameState.map[y][x] === 1) {
+                        cell.classList.add('minimap-wall');
+                    } else {
+                        cell.classList.add('minimap-floor');
+                    }
+
+                    // Entidades en minimapa
+                    if (gameState.player.x === x && gameState.player.y === y) {
+                        cell.classList.add('minimap-player');
+                    } else {
+                        const enemy = gameState.entities.find(e => e.x === x && e.y === y && e.type === 'enemy');
+                        if (enemy && gameState.visible[y][x]) {
+                            cell.classList.add('minimap-enemy');
+                        }
+                    }
+
+                    const item = gameState.items.find(i => i.x === x && i.y === y);
+                    if (item && gameState.visible[y][x]) {
+                        cell.classList.add('minimap-item');
+                    }
+
+                    minimap.appendChild(cell);
+                }
+            }
+        }
+
+        function showDamage(x, y, amount) {
+            const canvas = document.getElementById('gameCanvas');
+            const popup = document.createElement('div');
+            popup.className = 'damage-popup';
+            popup.textContent = `-${amount}`;
+            popup.style.left = `${x * 25 + 5}px`;
+            popup.style.top = `${y * 25}px`;
+            canvas.appendChild(popup);
+
+            setTimeout(() => popup.remove(), 1000);
+        }
+
+        // ==================== UI ====================
+        function updateUI() {
+            document.getElementById('hpCurrent').textContent = gameState.player.hp;
+            document.getElementById('hpMax').textContent = gameState.player.maxHp;
+            document.getElementById('hpBar').style.width = `${(gameState.player.hp / gameState.player.maxHp) * 100}%`;
+            
+            document.getElementById('level').textContent = gameState.player.level;
+            document.getElementById('xpBar').style.width = `${(gameState.player.xp / gameState.player.xpToNext) * 100}%`;
+            
+            const totalGold = gameState.items.filter(i => i.type === 'gold').reduce((sum, i) => sum + i.value, 0);
+            document.getElementById('gold').textContent = totalGold;
+            document.getElementById('floor').textContent = gameState.floor;
+
+            updateInventory();
+        }
+
+        function updateInventory() {
+            const inventoryList = document.getElementById('inventoryList');
+            inventoryList.innerHTML = '';
+
+            gameState.items.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'inventory-item';
+                
+                const img = document.createElement('img');
+                img.src = item.sprite;
+                
+                const span = document.createElement('span');
+                span.textContent = `${item.type === 'gold' ? item.value + ' Oro' : item.type.charAt(0).toUpperCase() + item.type.slice(1)}`;
+                
+                li.appendChild(img);
+                li.appendChild(span);
+                inventoryList.appendChild(li);
+            });
+        }
+
+        function logCombat(message, type) {
+            const log = document.getElementById('combatLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `> ${message}`;
+            log.insertBefore(entry, log.firstChild);
+
+            // Mantener solo las últimas 50 entradas
+            while (log.children.length > 50) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        function toggleMinimap() {
+            const minimapPanel = document.querySelector('.panel-box:nth-child(3)');
+            minimapPanel.style.display = minimapPanel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // ==================== ESTADOS DEL JUEGO ====================
+        function startGame() {
+            document.getElementById('startScreen').classList.add('hidden');
+            initGame();
+        }
+
+        function gameOver(reason) {
+            gameState.gameOver = true;
+            document.getElementById('deathReason').textContent = reason;
+            document.getElementById('finalFloor').textContent = gameState.floor;
+            document.getElementById('finalLevel').textContent = gameState.player.level;
+            
+            const totalGold = gameState.items.filter(i => i.type === 'gold').reduce((sum, i) => sum + i.value, 0);
+            document.getElementById('finalGold').textContent = totalGold;
+            
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+        }
+
+        function restartGame() {
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+
+        // ==================== EVENTOS ====================
+        document.addEventListener('keydown', (e) => {
+            if (gameState.gameOver) return;
+
+            switch (e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    movePlayer(0, -1);
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    movePlayer(0, 1);
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    movePlayer(-1, 0);
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    movePlayer(1, 0);
+                    break;
+                case ' ':
+                    waitTurn();
+                    break;
+                case 'g':
+                case 'G':
+                    pickUpItem();
+                    break;
+                case 'r':
+                case 'R':
+                    usePotion();
+                    break;
+                case 't':
+                case 'T':
+                    rest();
+                    break;
+            }
+        });
+
+        // Selección de héroe
+        document.querySelectorAll('.hero-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.hero-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                gameState.selectedHero = option.dataset.hero;
+            });
+        });
+
+        // Inicializar mostrando pantalla de inicio
+        document.getElementById('gameContainer').style.display = 'none';
     </script>
 </body>
 </html>
