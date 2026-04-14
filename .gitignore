@@ -1,20 +1,46 @@
-# Built application files
-*.apk
-
-# Files for the Dalvik VM
-*.dex
-
-# Java class files
-*.class
-
-# Gradle build files
-.gradle/
+```
+# Build artifacts
+dist/
 build/
-release/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
 
-# Local configuration file (sdk path, etc)
-local.properties
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+target/
+.gradle/
 
-#intellij project files
-*.iml
-*.idea
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+*.env.*
+```

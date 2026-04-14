@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dungeon Crawler - Estilo Pixel Dungeon</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --ui-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --accent: #f4a460;
+            --danger: #ff6b6b;
+            --success: #51cf66;
+            --tile-size: 32px;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            border: 4px solid var(--ui-bg);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        canvas {
+            display: block;
+            background-color: #000;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.7);
+            pointer-events: none;
+        }
+
+        .stat-box {
+            background: var(--ui-bg);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        #log {
+            width: 800px;
+            height: 100px;
+            background: var(--ui-bg);
+            margin-top: 10px;
+            overflow-y: auto;
+            padding: 10px;
+            font-size: 14px;
+            border: 2px solid #444;
+        }
+
+        .log-entry { margin-bottom: 4px; }
+        .log-combat { color: var(--danger); }
+        .log-gain { color: var(--success); }
+        .log-info { color: #aaa; }
+
+        #controls-hint {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        button {
+            background: var(--accent);
+            border: none;
+            padding: 8px 16px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 10px;
+        }
+        button:hover { filter: brightness(1.1); }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="ui-layer">
+            <div class="stat-box">HP: <span id="hp-val">100</span>/<span id="max-hp-val">100</span></div>
+            <div class="stat-box">Piso: <span id="floor-val">1</span></div>
+            <div class="stat-box">Oro: <span id="gold-val">0</span></div>
+        </div>
+    </div>
+
+    <div id="log"></div>
+    <div id="controls-hint">Usa las flechas o WASD para moverte y atacar. Espacio para esperar.</div>
+    <button onclick="game.init()">Reiniciar Juego</button>
+
+<script>
+/**
+ * MOTOR DEL JUEGO - Implementación simplificada de mecánicas tipo Rogue-like
+ */
+
+const TILE_SIZE = 32;
+const COLS = 25;
+const ROWS = 18;
+
+// Tipos de tiles
+const TILE = {
+    FLOOR: 0,
+    WALL: 1,
+    DOOR: 2,
+    STAIRS: 3
+};
+
+// Entidades
+class Entity {
+    constructor(x, y, symbol, color, name) {
+        this.x = x;
+        this.y = y;
+        this.symbol = symbol;
+        this.color = color;
+        this.name = name;
+        this.hp = 20;
+        this.maxHp = 20;
+        this.attack = 5;
+        this.dead = false;
+    }
+
+    draw(ctx) {
+        if (this.dead) return;
+        ctx.fillStyle = this.color;
+        ctx.font = '20px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.symbol, this.x * TILE_SIZE + TILE_SIZE/2, this.y * TILE_SIZE + TILE_SIZE/2);
+    }
+}
+
+class Player extends Entity {
+    constructor(x, y) {
+        super(x, y, '@', '#fff', 'Héroe');
+        this.hp = 100;
+        this.maxHp = 100;
+        this.attack = 10;
+        this.gold = 0;
+        this.floor = 1;
+    }
+}
+
+class Enemy extends Entity {
+    constructor(x, y, type) {
+        let symbol, color, hp, attack, name;
+        switch(type) {
+            case 'rat':
+                symbol = 'r'; color = '#888'; hp = 15; attack = 3; name = 'Rata Gigante'; break;
+            case 'goblin':
+                symbol = 'g'; color = '#51cf66'; hp = 25; attack = 6; name = 'Goblin'; break;
+            case 'orc':
+                symbol = 'O'; color = '#f4a460'; hp = 40; attack = 9; name = 'Orco'; break;
+            default:
+                symbol = '?'; color = '#fff'; hp = 10; attack = 1; name = 'Monstruo';
+        }
+        super(x, y, symbol, color, name);
+        this.hp = hp;
+        this.maxHp = hp;
+        this.attack = attack;
+        this.type = type;
+    }
+}
+
+class Item {
+    constructor(x, y, type) {
+        this.x = x;
+        this.y = y;
+        this.type = type; // 'potion', 'gold'
+        this.symbol = type === 'gold' ? '$' : '!';
+        this.color = type === 'gold' ? '#ffd700' : '#ff6b6b';
+        this.value = type === 'gold' ? Math.floor(Math.random() * 10) + 5 : 20;
+    }
+    
+    draw(ctx) {
+        ctx.fillStyle = this.color;
+        ctx.font = '20px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.symbol, this.x * TILE_SIZE + TILE_SIZE/2, this.y * TILE_SIZE + TILE_SIZE/2);
+    }
+}
+
+class Game {
+    constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.logEl = document.getElementById('log');
+        this.map = [];
+        this.entities = [];
+        this.items = [];
+        this.player = null;
+        this.exit = {x: 0, y: 0};
+        this.visible = []; // Matriz de visibilidad
+        
+        this.inputHandler = this.handleInput.bind(this);
+        document.addEventListener('keydown', this.inputHandler);
+        
+        this.init();
+    }
+
+    init() {
+        this.logEl.innerHTML = '';
+        this.log("Bienvenido a las mazmorras...", "log-info");
+        this.generateLevel();
+        this.draw();
+        this.updateUI();
+    }
+
+    log(msg, className = "") {
+        const div = document.createElement('div');
+        div.className = `log-entry ${className}`;
+        div.textContent = `> ${msg}`;
+        this.logEl.prepend(div);
+    }
+
+    generateLevel() {
+        // 1. Inicializar mapa lleno de paredes
+        this.map = [];
+        for (let y = 0; y < ROWS; y++) {
+            let row = [];
+            for (let x = 0; x < COLS; x++) {
+                row.push(TILE.WALL);
+            }
+            this.map.push(row);
+        }
+
+        // 2. Algoritmo simple de habitaciones aleatorias
+        const rooms = [];
+        const maxRooms = 8;
+        const minSize = 4;
+        const maxSize = 8;
+
+        for (let i = 0; i < maxRooms; i++) {
+            const w = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
+            const h = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
+            const x = Math.floor(Math.random() * (COLS - w - 2)) + 1;
+            const y = Math.floor(Math.random() * (ROWS - h - 2)) + 1;
+
+            const newRoom = { x, y, w, h, cx: Math.floor(x + w/2), cy: Math.floor(y + h/2) };
+
+            // Verificar colisión con otras habitaciones
+            let failed = false;
+            for (let other of rooms) {
+                if (newRoom.x <= other.x + other.w && newRoom.x + newRoom.w >= other.x &&
+                    newRoom.y <= other.y + other.h && newRoom.y + newRoom.h >= other.y) {
+                    failed = true;
+                    break;
+                }
+            }
+
+            if (!failed) {
+                this.createRoom(newRoom);
+                
+                if (rooms.length > 0) {
+                    const prev = rooms[rooms.length - 1];
+                    this.createTunnel(prev.cx, prev.cy, newRoom.cx, newRoom.cy);
+                }
+
+                rooms.push(newRoom);
+            }
+        }
+
+        // Colocar jugador en la primera habitación
+        const startRoom = rooms[0];
+        if (!this.player) {
+            this.player = new Player(startRoom.cx, startRoom.cy);
+        } else {
+            this.player.x = startRoom.cx;
+            this.player.y = startRoom.cy;
+        }
+
+        // Colocar salida en la última habitación
+        const endRoom = rooms[rooms.length - 1];
+        this.exit = { x: endRoom.cx, y: endRoom.cy };
+        this.map[this.exit.y][this.exit.x] = TILE.STAIRS;
+
+        // Generar enemigos e items
+        this.entities = [];
+        this.items = [];
+        
+        rooms.slice(1).forEach((room, index) => {
+            // Probabilidad de enemigo
+            if (Math.random() > 0.3) {
+                const types = ['rat', 'goblin', 'orc'];
+                const type = types[Math.min(Math.floor(this.player.floor / 2) + Math.floor(Math.random()*2), 2)];
+                const ex = Math.floor(room.x + Math.random() * room.w);
+                const ey = Math.floor(room.y + Math.random() * room.h);
+                if (this.map[ey][ex] === TILE.FLOOR) {
+                    this.entities.push(new Enemy(ex, ey, type));
+                }
+            }
+            
+            // Probabilidad de item
+            if (Math.random() > 0.6) {
+                const ix = Math.floor(room.x + Math.random() * room.w);
+                const iy = Math.floor(room.y + Math.random() * room.h);
+                if (this.map[iy][ix] === TILE.FLOOR) {
+                    const itemType = Math.random() > 0.7 ? 'potion' : 'gold';
+                    this.items.push(new Item(ix, iy, itemType));
+                }
+            }
+        });
+
+        this.calculateFOV();
+        this.log(`Entrando al piso ${this.player.floor}...`, "log-info");
+    }
+
+    createRoom(room) {
+        for (let y = room.y; y < room.y + room.h; y++) {
+            for (let x = room.x; x < room.x + room.w; x++) {
+                this.map[y][x] = TILE.FLOOR;
+            }
+        }
+    }
+
+    createTunnel(x1, y1, x2, y2) {
+        // Tunnel horizontal luego vertical
+        let x = x1;
+        let y = y1;
+        while (x !== x2) {
+            this.map[y][x] = TILE.FLOOR;
+            x += (x2 > x) ? 1 : -1;
+        }
+        while (y !== y2) {
+            this.map[y][x] = TILE.FLOOR;
+            y += (y2 > y) ? 1 : -1;
+        }
+        this.map[y][x] = TILE.FLOOR; // Último tile
+    }
+
+    calculateFOV() {
+        // Visibilidad simple basada en distancia
+        this.visible = [];
+        for (let y = 0; y < ROWS; y++) {
+            let row = [];
+            for (let x = 0; x < COLS; x++) {
+                const dist = Math.sqrt((x - this.player.x)**2 + (y - this.player.y)**2);
+                row.push(dist < 8); // Radio de visión 8
+            }
+            this.visible.push(row);
+        }
+    }
+
+    handleInput(e) {
+        if (this.player.dead) return;
+
+        let dx = 0;
+        let dy = 0;
+        let acted = false;
+
+        switch(e.key) {
+            case 'ArrowUp': case 'w': dy = -1; break;
+            case 'ArrowDown': case 's': dy = 1; break;
+            case 'ArrowLeft': case 'a': dx = -1; break;
+            case 'ArrowRight': case 'd': dx = 1; break;
+            case ' ': acted = true; break; // Esperar
+            default: return;
+        }
+
+        if (dx !== 0 || dy !== 0) {
+            const newX = this.player.x + dx;
+            const newY = this.player.y + dy;
+            
+            // Colisión con paredes
+            if (this.map[newY][newX] === TILE.WALL) {
+                acted = false;
+            } 
+            // Combate
+            else {
+                const enemy = this.entities.find(en => en.x === newX && en.y === newY && !en.dead);
+                if (enemy) {
+                    this.attackEnemy(enemy);
+                    acted = true;
+                } else {
+                    this.player.x = newX;
+                    this.player.y = newY;
+                    acted = true;
+                    
+                    // Recoger items
+                    const itemIndex = this.items.findIndex(it => it.x === newX && it.y === newY);
+                    if (itemIndex !== -1) {
+                        const item = this.items[itemIndex];
+                        if (item.type === 'gold') {
+                            this.player.gold += item.value;
+                            this.log(`Recogiste ${item.value} de oro.`, "log-gain");
+                        } else if (item.type === 'potion') {
+                            const heal = item.value;
+                            this.player.hp = Math.min(this.player.hp + heal, this.player.maxHp);
+                            this.log(`Bebiste poción. +${heal} HP.`, "log-gain");
+                        }
+                        this.items.splice(itemIndex, 1);
+                    }
+
+                    // Escaleras
+                    if (this.map[newY][newX] === TILE.STAIRS) {
+                        this.nextLevel();
+                        return; // No procesar turno de enemigos si cambiamos de nivel
+                    }
+                }
+            }
+        }
+
+        if (acted) {
+            this.calculateFOV();
+            this.enemyTurn();
+            this.draw();
+            this.updateUI();
+            
+            if (this.player.hp <= 0) {
+                this.player.dead = true;
+                this.log("¡HAS MUERTO! Game Over.", "log-combat");
+                alert("Has muerto. Pulsa Reiniciar.");
+            }
+        }
+    }
+
+    attackEnemy(enemy) {
+        const dmg = Math.floor(this.player.attack * (0.8 + Math.random() * 0.4));
+        enemy.hp -= dmg;
+        this.log(`Atacas a ${enemy.name} por ${dmg} daño.`, "log-combat");
+        
+        if (enemy.hp <= 0) {
+            enemy.dead = true;
+            this.log(`${enemy.name} ha sido derrotado.`, "log-gain");
+            // Chance de drop
+            if (Math.random() > 0.5) {
+                this.items.push(new Item(enemy.x, enemy.y, 'gold'));
+            }
+        }
+    }
+
+    enemyTurn() {
+        this.entities.forEach(enemy => {
+            if (enemy.dead) return;
+            
+            const dist = Math.abs(enemy.x - this.player.x) + Math.abs(enemy.y - this.player.y);
+            
+            if (dist <= 1) {
+                // Atacar jugador
+                const dmg = Math.floor(enemy.attack * (0.8 + Math.random() * 0.4));
+                this.player.hp -= dmg;
+                this.log(`${enemy.name} te ataca por ${dmg} daño.`, "log-combat");
+            } else if (dist < 8 && this.visible[enemy.y][enemy.x]) {
+                // Moverse hacia jugador (IA muy básica)
+                let dx = 0, dy = 0;
+                if (Math.abs(enemy.x - this.player.x) > Math.abs(enemy.y - this.player.y)) {
+                    dx = (enemy.x < this.player.x) ? 1 : -1;
+                } else {
+                    dy = (enemy.y < this.player.y) ? 1 : -1;
+                }
+
+                const newX = enemy.x + dx;
+                const newY = enemy.y + dy;
+
+                // Verificar colisiones simples
+                if (this.map[newY][newX] !== TILE.WALL && 
+                    !this.entities.some(e => e.x === newX && e.y === newY && !e.dead) &&
+                    !(newX === this.player.x && newY === this.player.y)) {
+                    enemy.x = newX;
+                    enemy.y = newY;
+                }
+            }
+        });
+    }
+
+    nextLevel() {
+        this.player.floor++;
+        this.log(`Bajas al piso ${this.player.floor}.`, "log-info");
+        this.generateLevel();
+    }
+
+    updateUI() {
+        document.getElementById('hp-val').textContent = this.player.hp;
+        document.getElementById('max-hp-val').textContent = this.player.maxHp;
+        document.getElementById('floor-val').textContent = this.player.floor;
+        document.getElementById('gold-val').textContent = this.player.gold;
+        
+        // Color dinámico de HP
+        const hpPercent = this.player.hp / this.player.maxHp;
+        document.getElementById('hp-val').style.color = hpPercent < 0.3 ? '#ff6b6b' : '#fff';
+    }
+
+    draw() {
+        // Limpiar
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Dibujar Mapa
+        for (let y = 0; y < ROWS; y++) {
+            for (let x = 0; x < COLS; x++) {
+                const isVisible = this.visible[y][x];
+                if (!isVisible) continue;
+
+                let color;
+                switch(this.map[y][x]) {
+                    case TILE.WALL: color = '#444'; break;
+                    case TILE.FLOOR: color = '#222'; break;
+                    case TILE.STAIRS: color = '#fff'; break;
+                    default: color = '#000';
+                }
+
+                this.ctx.fillStyle = color;
+                this.ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                
+                // Detalle escaleras
+                if (this.map[y][x] === TILE.STAIRS) {
+                    this.ctx.fillStyle = '#aaa';
+                    this.ctx.font = '20px monospace';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText('>', x * TILE_SIZE + TILE_SIZE/2, y * TILE_SIZE + TILE_SIZE/2);
+                }
+            }
+        }
+
+        // Dibujar Items
+        this.items.forEach(item => {
+            if (this.visible[item.y][item.x]) item.draw(this.ctx);
+        });
+
+        // Dibujar Enemigos
+        this.entities.forEach(entity => {
+            if (!entity.dead && this.visible[entity.y][entity.x]) {
+                entity.draw(this.ctx);
+                // Barra de vida pequeña
+                if (entity.hp < entity.maxHp) {
+                    this.ctx.fillStyle = 'red';
+                    this.ctx.fillRect(entity.x * TILE_SIZE + 2, entity.y * TILE_SIZE, TILE_SIZE - 4, 3);
+                    this.ctx.fillStyle = '#51cf66';
+                    this.ctx.fillRect(entity.x * TILE_SIZE + 2, entity.y * TILE_SIZE, (TILE_SIZE - 4) * (entity.hp/entity.maxHp), 3);
+                }
+            }
+        });
+
+        // Dibujar Jugador
+        this.player.draw(this.ctx);
+    }
+}
+
+// Iniciar juego
+const game = new Game();
+
+</script>
+</body>
+</html>
